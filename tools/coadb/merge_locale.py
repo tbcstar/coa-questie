@@ -167,7 +167,10 @@ def replace_objectives(body, text):
     if re.search(OBJECTIVES, body):
         return re.sub(OBJECTIVES, lambda m: "[8]={" + lua_str(text) + "}", body, count=1), 1
     if body.endswith("}"):
-        return body[:-1] + "[8]={" + lua_str(text) + "}}", 1
+        # a field needs a comma after the one it follows; "{}" and "{[1]=x" get one only when needed
+        head = body[:-1]
+        sep = "" if head.endswith("{") else ","
+        return head + sep + "[8]={" + lua_str(text) + "}}", 1
     return body, 0
 
 
@@ -195,7 +198,7 @@ def merge(data_dir, stem, rows, kind, dry_run):
             # quest_template_locale calls the title "Title"; creature/gameobject/item_template_locale
             # call the name "Name" and the NPC's <subname> "Title"
             if kind == "quest":
-                text = clean(row.get("title") or "") or clean(row.get("name") or "")
+                text = clean(row.get("title") or "") or clean(row.get("logtitle") or "") or clean(row.get("name") or "")
             else:
                 text = clean(row.get("name") or "") or clean(row.get("title") or "")
             if text:
@@ -207,7 +210,7 @@ def merge(data_dir, stem, rows, kind, dry_run):
                     body, n = replace_subname(body, sub)
                     fields += n
             if kind == "quest":
-                obj = clean(row.get("objectives") or "")
+                obj = clean(row.get("objectives") or "") or clean(row.get("logdescription") or "")
                 if obj:
                     body, n = replace_objectives(body, obj)
                     fields += n
@@ -240,7 +243,7 @@ def main():
     if not any((args.quests, args.creatures, args.objects, args.items)):
         raise SystemExit("nothing to merge: pass at least one --quests/--creatures/--objects/--items")
     total = 0
-    total += merge(args.data_dir, "CoAQuestDB", read_rows(args.quests, args.locale, ("id",), ("title", "objectives")) if args.quests else {}, "quest", args.dry_run)
+    total += merge(args.data_dir, "CoAQuestDB", read_rows(args.quests, args.locale, ("id",), ("title", "objectives", "logtitle", "logdescription")) if args.quests else {}, "quest", args.dry_run)
     total += merge(args.data_dir, "CoANpcDB", read_rows(args.creatures, args.locale, ("entry", "id"), ("name", "title", "subname")) if args.creatures else {}, "npc", args.dry_run)
     total += merge(args.data_dir, "CoAObjectDB", read_rows(args.objects, args.locale, ("entry", "id"), ("name",)) if args.objects else {}, "object", args.dry_run)
     total += merge(args.data_dir, "CoAItemDB", read_rows(args.items, args.locale, ("id", "entry"), ("name",)) if args.items else {}, "item", args.dry_run)

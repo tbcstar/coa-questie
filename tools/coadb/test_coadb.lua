@@ -57,7 +57,8 @@ for _, kind in ipairs({ "QUEST", "NPC", "OBJECT", "ITEM" }) do
 	print(kind, injected[kind])
 end
 local q = QuestieDB.questDataOverrides
-assert(q[17006] and q[17006][1] == "King's Justice" and q[17006][2], "a new CoA quest has a name and a giver")
+-- the text is translated in place by merge_locale.py, so assert that a name is there, not which language it is in
+assert(q[17006] and type(q[17006][1]) == "string" and #q[17006][1] > 0 and q[17006][2], "a new CoA quest has a name and a giver")
 if addonTable.questData[1903520] and addonTable.questData[1903520][1] then
 	assert(q[1903520][1] == addonTable.questData[1903520][1], "CoA values win over Ascension-protected fields")
 end
