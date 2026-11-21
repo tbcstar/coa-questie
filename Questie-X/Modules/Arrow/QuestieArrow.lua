@@ -17,6 +17,8 @@ local QuestiePlayer = QuestieLoader:ImportModule("QuestiePlayer")
 local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type QuestieArrowAssets
 local QuestieArrowAssets = QuestieLoader:ImportModule("QuestieArrowAssets")
+---@type l10n
+local l10n = QuestieLoader:ImportModule("l10n")
 
 local HBD = QuestieCompat.HBD or LibStub("HereBeDragonsQuestie-2.0")
 local SharedMedia = LibStub and LibStub("LibSharedMedia-3.0", true)
@@ -169,17 +171,19 @@ end
 local function _FormatDistance(dist)
     local unit = _GetDistanceUnit()
     local value = dist
-    local suffix = " yd"
+    -- The unit belongs to the format string, not next to it: a language decides where the word goes
+    -- ("49.1 yd" in English, "49.1 码" in Chinese) and whether the number and the unit keep a space.
+    local pattern = "%.1f yd"
 
     if unit == "meters" then
         value = dist * 0.9144
-        suffix = " m"
+        pattern = "%.1f m"
     elseif unit == "feet" then
         value = dist * 3
-        suffix = " ft"
+        pattern = "%.1f ft"
     end
 
-    return string.format("%.1f%s", value, suffix)
+    return string.format(l10n(pattern), value)
 end
 
 local function _SortTargetByDistance(a, b)
@@ -503,7 +507,7 @@ local function _UpdateObjectText(target)
 
     if not target then
         objectiveFrame.title:SetText("")
-        objectiveFrame.distance:SetText("Distance: --")
+        objectiveFrame.distance:SetText(l10n("Distance: --"))
         objectiveFrame.icon:Hide()
         return
     end
@@ -865,7 +869,7 @@ EnsureArrowFrame = function()
         local playerX, playerY, playerInstance = HBD:GetPlayerWorldPosition()
         if not playerX or not playerY or not playerInstance then
             if objectiveFrame then
-                objectiveFrame.distance:SetText("Distance: --")
+                objectiveFrame.distance:SetText(l10n("Distance: --"))
             end
             return
         end
@@ -878,7 +882,7 @@ EnsureArrowFrame = function()
         end
         if not targetX or not targetY or not targetInstance then
             if objectiveFrame then
-                objectiveFrame.distance:SetText("Distance: --")
+                objectiveFrame.distance:SetText(l10n("Distance: --"))
             end
             return
         end
@@ -954,7 +958,7 @@ EnsureArrowFrame = function()
             self.arrow:SetAlpha(alpha)
 
             if objectiveFrame then
-                local distanceText = "Distance: " .. _FormatDistance(dist)
+                local distanceText = l10n("Distance: %s", _FormatDistance(dist))
                 if objectiveFrame._lastDistanceText ~= distanceText then
                     objectiveFrame.distance:SetText(distanceText)
                     objectiveFrame._lastDistanceText = distanceText
@@ -1502,9 +1506,9 @@ function QuestieArrow:GetArrowStyleOptions()
 
     local customPreview = _GetArrowPreviewPath()
     if customPreview then
-        values.custom = string.format("|T%s:32:32:0:0|t    %s", customPreview, "Custom")
+        values.custom = string.format("|T%s:32:32:0:0|t    %s", customPreview, l10n("Custom"))
     else
-        values.custom = "Custom"
+        values.custom = l10n("Custom")
     end
 
     return values

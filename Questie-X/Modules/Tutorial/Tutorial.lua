@@ -39,7 +39,7 @@ function Tutorial.CreateAscensionScalingFrame()
 
     -- Title
     local title = baseFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetText("Ascension Level Scaling")
+    title:SetText(l10n("Ascension Level Scaling"))
     title:SetPoint("TOP", 0, -16)
 
     ----------------------------------------------------------------
@@ -78,12 +78,12 @@ function Tutorial.CreateAscensionScalingFrame()
 
         -- Title text
         local titleText = card:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        titleText:SetText(config.title)
+        titleText:SetText(l10n(config.title))
         titleText:SetPoint("TOP", icon, "BOTTOM", 0, -6)
 
         -- Description
         local desc = card:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        desc:SetText(config.desc)
+        desc:SetText(l10n(config.desc))
         desc:SetWidth(260)
         desc:SetJustifyH("CENTER")
         desc:SetPoint("TOP", titleText, "BOTTOM", 0, -4)
@@ -107,12 +107,6 @@ function Tutorial.CreateAscensionScalingFrame()
 		baseFrame:Hide()
 		end)
 		
-		-- Setting change later
-		local footerText = baseFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-		footerText:SetText("You can change this later from Questie settings.")
-		footerText:SetTextColor(1, 0.82, 0, 1)
-		footerText:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
-		footerText:SetPoint("BOTTOM", 0, 12)
     end
 
     ----------------------------------------------------------------
@@ -136,6 +130,13 @@ function Tutorial.CreateAscensionScalingFrame()
         questIcon = "Interface\\AddOns\\Questie-335\\Icons\\available_gray.blp",
         enable = false,
     })
+    -- One footer for the frame: CreateCard used to make it twice, once
+    -- per card, so two font strings sat on top of each other.
+    local footerText = baseFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    footerText:SetText(l10n("You can change this later from Questie settings."))
+    footerText:SetTextColor(1, 0.82, 0, 1)
+    footerText:SetFont("Fonts\\FRIZQT__.TTF", 16, "OUTLINE")
+    footerText:SetPoint("BOTTOM", 0, 12)
 end
 
 

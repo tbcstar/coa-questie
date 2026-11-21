@@ -30,6 +30,38 @@ local supportedLocals = {
     ['koKR'] = true,
 }
 
+-- Whether the client's own words are Chinese, whatever GetLocale() says.
+-- This client reports enUS while everything the player reads is Chinese
+-- (patch-ZH.mpq, 21 Nov 2026): a locale taken from GetLocale() alone
+-- leaves Questie speaking English on a client that reads Chinese. Read a
+-- few of the game's own labels instead: they are the same data the player
+-- reads in the quest log and the menus, so they cannot disagree with it.
+local function ClientTextIsChinese()
+    local probes = { _G.ACCEPT, _G.CANCEL, _G.OKAY, _G.LEAVE, _G.BINDING_HEADER_MOVEMENT }
+    for _, text in ipairs(probes) do
+        if type(text) == "string" then
+            for i = 1, #text do
+                local b = text:byte(i)
+                -- UTF-8 lead bytes of U+4E00..U+9FFF, where Chinese sits
+                if b >= 0xE4 and b <= 0xE9 then return true end
+            end
+        end
+    end
+    return false
+end
+
+-- The language the player actually reads in: `GetLocale()`, except where
+-- the client says enUS but its own labels are Chinese (a CoA client whose
+-- data is patched Chinese while its interface folder stays enUS).
+---@return string
+function l10n:GetClientLocale()
+    local reported = GetLocale()
+    if (reported == "enUS" or reported == "enGB") and ClientTextIsChinese() then
+        return "zhCN"
+    end
+    return reported
+end
+
 function l10n:InitializeLocaleOverride()
     local overridingLocale = QUESTIE_LOCALES_OVERRIDE.locale
     supportedLocals[overridingLocale] = true

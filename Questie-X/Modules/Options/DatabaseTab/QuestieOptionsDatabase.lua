@@ -93,7 +93,7 @@ end
 
 _OpenExportDialog = function(exportStr, stats)
     local f = AceGUI:Create("Frame")
-    f:SetTitle("Questie-X — Export Learned Data")
+    f:SetTitle(l10n("Questie-X — Export Learned Data"))
     f:SetWidth(620)
     f:SetHeight(420)
     f:SetLayout("Flow")
@@ -102,7 +102,7 @@ _OpenExportDialog = function(exportStr, stats)
     local info = AceGUI:Create("Label")
     info:SetFullWidth(true)
     info:SetText(string.format(
-        "|cFFFFD700Server:|r %s    |cFFFFD700NPCs:|r %d    |cFFFFD700Quests:|r %d    |cFFFFD700Items:|r %d    |cFFFFD700Objects:|r %d    |cFFFFD700Total:|r %d entries",
+        l10n("|cFFFFD700Server:|r %s    |cFFFFD700NPCs:|r %d    |cFFFFD700Quests:|r %d    |cFFFFD700Items:|r %d    |cFFFFD700Objects:|r %d    |cFFFFD700Total:|r %d entries"),
         GetServer(), stats.npcs or 0, stats.quests or 0, stats.items or 0, stats.objects or 0, stats.total or 0
     ))
     f:AddChild(info)
@@ -115,14 +115,14 @@ _OpenExportDialog = function(exportStr, stats)
     local box = AceGUI:Create("MultiLineEditBox")
     box:SetFullWidth(true)
     box:SetNumLines(14)
-    box:SetLabel("Select all and copy (Ctrl+A, Ctrl+C):")
+    box:SetLabel(l10n("Select all and copy (Ctrl+A, Ctrl+C):"))
     box:SetText(exportStr)
     box:DisableButton(true)
     f:AddChild(box)
 
     local hint = AceGUI:Create("Label")
     hint:SetFullWidth(true)
-    hint:SetText("|cFF888888To share your data: copy this string and submit it on the Questie-X GitHub or Discord. Contributors help grow the quest database for everyone.|r")
+    hint:SetText(l10n("|cFF888888To share your data: copy this string and submit it on the Questie-X GitHub or Discord. Contributors help grow the quest database for everyone.|r"))
     f:AddChild(hint)
 end
 
@@ -132,7 +132,7 @@ end
 
 _OpenImportDialog = function()
     local f = AceGUI:Create("Frame")
-    f:SetTitle("Questie-X — Import Learned Data")
+    f:SetTitle(l10n("Questie-X — Import Learned Data"))
     f:SetWidth(620)
     f:SetHeight(420)
     f:SetLayout("Flow")
@@ -140,7 +140,7 @@ _OpenImportDialog = function()
 
     local statusLabel = AceGUI:Create("Label")
     statusLabel:SetFullWidth(true)
-    statusLabel:SetText("|cFF888888Paste a QxLD export string below, then click Validate.|r")
+    statusLabel:SetText(l10n("|cFF888888Paste a QxLD export string below, then click Validate.|r"))
     f:AddChild(statusLabel)
 
     local spacer = AceGUI:Create("Label")
@@ -151,18 +151,18 @@ _OpenImportDialog = function()
     local box = AceGUI:Create("MultiLineEditBox")
     box:SetFullWidth(true)
     box:SetNumLines(12)
-    box:SetLabel("Paste export string here:")
+    box:SetLabel(l10n("Paste export string here:"))
     box:SetText("")
     box:DisableButton(true)
     f:AddChild(box)
 
     local validateBtn = AceGUI:Create("Button")
-    validateBtn:SetText("Validate")
+    validateBtn:SetText(l10n("Validate"))
     validateBtn:SetWidth(120)
     f:AddChild(validateBtn)
 
     local importBtn = AceGUI:Create("Button")
-    importBtn:SetText("Import")
+    importBtn:SetText(l10n("Import"))
     importBtn:SetWidth(120)
     importBtn:SetDisabled(true)
     f:AddChild(importBtn)
@@ -170,17 +170,17 @@ _OpenImportDialog = function()
     validateBtn:SetCallback("OnClick", function()
         local Exp = GetExportModule()
         if not Exp then
-            statusLabel:SetText("|cFFFF0000Export module not loaded.|r")
+            statusLabel:SetText(l10n("|cFFFF0000Export module not loaded.|r"))
             return
         end
         local input = box:GetText()
         local payload, statsOrErr = Exp:ValidateImport(input)
         if not payload then
-            statusLabel:SetText("|cFFFF0000Validation failed: " .. tostring(statsOrErr) .. "|r")
+            statusLabel:SetText(l10n("|cFFFF0000Validation failed: %s|r", tostring(statsOrErr)))
             importBtn:SetDisabled(true)
         else
             statusLabel:SetText(string.format(
-                "|cFF00FF00Valid! Server: %s  NPCs: %d  Quests: %d  Items: %d  Objects: %d  Total: %d|r",
+                l10n("|cFF00FF00Valid! Server: %s  NPCs: %d  Quests: %d  Items: %d  Objects: %d  Total: %d|r"),
                 statsOrErr.server or "?",
                 statsOrErr.npcs or 0, statsOrErr.quests or 0,
                 statsOrErr.items or 0, statsOrErr.objects or 0,
@@ -600,7 +600,7 @@ function QuestieOptions.tabs.database:Initialize()
             plugins_header = {
                 type  = "header",
                 order = 7,
-                name  = "|cFF5EBAF3Loaded Questie-X Plugins|r",
+                name  = "|cFF5EBAF3" .. l10n("Loaded Questie-X Plugins") .. "|r",
             },
 
             plugins_desc = {

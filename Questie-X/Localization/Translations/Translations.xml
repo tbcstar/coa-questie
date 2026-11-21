@@ -23,6 +23,8 @@
     <Script file="Options\Tracker.lua"/>
     <Script file="Options\Auto.lua"/>
     <Script file="Options\Icons.lua"/>
+    <Script file="Options\Database.lua"/>
+    <Script file="Options\Arrow.lua"/>
 
     <Script file="Zones\Battlegrounds.lua"/>
     <Script file="Zones\Dungeons.lua"/>

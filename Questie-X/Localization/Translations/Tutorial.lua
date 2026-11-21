@@ -110,6 +110,38 @@ local tutorialLocals = {
         ["esES"] = "(Esto siempre se puede cambiar en la pestaña de Iconos de la configuración)",
         ["frFR"] = "(Ce choix peut être changé à nouveau dans l'onglet Icones des réglages)",
     },
+    -- The Ascension/CoA quest level-scaling choice. The popup and the
+    -- General options row both read these keys (21 Nov 2026).
+    ["Ascension Level Scaling"] = {
+        ["enUS"] = true,
+        ["zhCN"] = "升天等级缩放",
+        ["zhTW"] = "昇天等級縮放",
+    },
+    ["Scale Quest Levels"] = {
+        ["enUS"] = true,
+        ["zhCN"] = "任务等级跟随你",
+        ["zhTW"] = "任務等級跟隨你",
+    },
+    ["Low-level quests scale to your level\nand remain relevant."] = {
+        ["enUS"] = true,
+        ["zhCN"] = "低等级任务会调整到你的等级，\n不会因为等级低而变得无关紧要。",
+        ["zhTW"] = "低等級任務會調整到你的等級，\n不會因為等級低而變得無關緊要。",
+    },
+    ["Original Quest Levels"] = {
+        ["enUS"] = true,
+        ["zhCN"] = "任务原始等级",
+        ["zhTW"] = "任務原始等級",
+    },
+    ["Quests keep their original levels.\nLow-level quests turn gray."] = {
+        ["enUS"] = true,
+        ["zhCN"] = "任务保持原始等级，\n低等级任务会变成灰色。",
+        ["zhTW"] = "任務保持原始等級，\n低等級任務會變成灰色。",
+    },
+    ["You can change this later from Questie settings."] = {
+        ["enUS"] = true,
+        ["zhCN"] = "之后可以在 Questie 设置里更改。",
+        ["zhTW"] = "之後可以在 Questie 設定裡更改。",
+    },
 }
 
 for k, v in pairs(tutorialLocals) do

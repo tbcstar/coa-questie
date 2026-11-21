@@ -553,7 +553,7 @@ function QuestieOptions.tabs.advanced:Initialize()
                 set = function(_, lang)
                     local previousLocale = Questie.db.global.questieLocale
                     if lang == 'auto' then
-                        local clientLocale = GetLocale()
+                        local clientLocale = l10n:GetClientLocale()
                         if QUESTIE_LOCALES_OVERRIDE ~= nil then
                             clientLocale = QUESTIE_LOCALES_OVERRIDE.locale
                         end

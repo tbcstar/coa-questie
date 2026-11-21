@@ -40,9 +40,11 @@ local minimapOptionsLocales = {
     },
     ["Hide Questie minimap quest icons"] = {
         ["enUS"] = true,
+        ["zhCN"] = "隐藏 Questie 小地图任务图标",
     },
     ["Hides available and completed quest icons on the minimap only. Objective icons are unaffected."] = {
         ["enUS"] = true,
+        ["zhCN"] = "只在小地图上隐藏可接取和已完成的任务图标，目标图标不受影响。",
     },
     ["Unique Minimap Icon Colors"] = {
             ["ptBR"] = "Cores únicas para os ícones da minimapa",

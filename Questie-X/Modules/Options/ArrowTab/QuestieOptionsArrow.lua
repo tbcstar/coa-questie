@@ -289,9 +289,9 @@ function QuestieOptions.tabs.arrow:Initialize()
                 desc = function() return l10n("Choose the unit used for the distance label.") end,
                 values = function()
                     return {
-                        yards = "Yards",
-                        meters = "Meters",
-                        feet = "Feet",
+                        yards = l10n("Yards"),
+                        meters = l10n("Meters"),
+                        feet = l10n("Feet"),
                     }
                 end,
                 get = function() return Questie.db.profile.arrowDistanceUnit or "yards" end,
