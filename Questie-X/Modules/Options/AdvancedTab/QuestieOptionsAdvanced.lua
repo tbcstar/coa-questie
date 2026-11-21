@@ -255,12 +255,14 @@ function QuestieOptions.tabs.advanced:Initialize()
             learnerPerformanceMode = {
                 type = "select",
                 order = 2.1,
-                values = {
+                values = function()
+                    return {
                     realtime = l10n("Realtime"),
                     balanced = l10n("Balanced"),
                     low = l10n("Low Impact"),
                     manual = l10n("Manual"),
-                },
+                    }
+                end,
                 style = "dropdown",
                 name = function() return l10n('Performance Mode'); end,
                 desc = function() return l10n('Controls how aggressively QuestieLearner updates learned pins, live data, and learner comms. Low Impact is recommended for heavy activity zones or low-end computers.'); end,
@@ -273,11 +275,13 @@ function QuestieOptions.tabs.advanced:Initialize()
             learnerPinRefreshMode = {
                 type = "select",
                 order = 2.2,
-                values = {
+                values = function()
+                    return {
                     immediate = l10n("Immediate"),
                     batched = l10n("Batched"),
                     manual = l10n("Manual / Reload"),
-                },
+                    }
+                end,
                 style = "dropdown",
                 name = function() return l10n('Pin Refresh Behavior'); end,
                 desc = function() return l10n('Controls when learned pins refresh after QuestieLearner records new data. Manual / Reload records data but avoids live pin redraws until reload or another Questie refresh.'); end,
@@ -380,12 +384,14 @@ function QuestieOptions.tabs.advanced:Initialize()
             learnerCommsIntensity = {
                 type = "select",
                 order = 2.6,
-                values = {
+                values = function()
+                    return {
                     off = l10n("Off"),
                     low = l10n("Low"),
                     normal = l10n("Normal"),
                     fast = l10n("Fast"),
-                },
+                    }
+                end,
                 style = "dropdown",
                 name = function() return l10n('Learner Comms Intensity'); end,
                 desc = function() return l10n('Controls how much learner data Questie processes and sends through learner comms. Lower values reduce CPU and chat-channel work.'); end,
@@ -661,7 +667,7 @@ function QuestieOptions.tabs.advanced:Initialize()
             HeaderDev = {
                 type = "header",
                 order = 5,
-                name = l10n('Developer Options'),
+                name = function() return l10n('Developer Options') end,
             },
             bugWorkarounds = {
                 type = "toggle",
@@ -812,14 +818,14 @@ function QuestieOptions.tabs.advanced:Initialize()
             compat_header = {
                 type = "header",
                 order = 6,
-                name = "3.3.5 Compatibility Settings",
+                name = function() return l10n("3.3.5 Compatibility Settings") end,
                 hidden = function() return not (Questie.IsWotlk or (QuestieCompat and QuestieCompat.Is335)) end,
             },
             useWotlkMapData = {
                 type = "toggle",
                 order = 6.1,
-                name = "Use WotLK map data",
-                desc = "Use WotLK map data for exploration and coordinates.",
+                name = function() return l10n("Use WotLK map data") end,
+                desc = function() return l10n("Use WotLK map data for exploration and coordinates.") end,
                 width = 1.65,
                 hidden = function() return not (Questie.IsWotlk or (QuestieCompat and QuestieCompat.Is335)) end,
                 get = function(info) return QuestieOptions:GetProfileValue(info); end,
@@ -831,8 +837,8 @@ function QuestieOptions.tabs.advanced:Initialize()
             initDelay = {
                 type = "range",
                 order = 6.2,
-                name = "Init rate delay",
-                desc = "Adjust the initialization rate delay (seconds) for slower systems.",
+                name = function() return l10n("Init rate delay") end,
+                desc = function() return l10n("Adjust the initialization rate delay (seconds) for slower systems.") end,
                 width = 1.65,
                 min = 0.01,
                 max = 0.5,
@@ -846,8 +852,8 @@ function QuestieOptions.tabs.advanced:Initialize()
             resetDailyQuests = {
                 type = "toggle",
                 order = 6.3,
-                name = "Reset Daily Quests",
-                desc = "Force a daily quest reset check.",
+                name = function() return l10n("Reset Daily Quests") end,
+                desc = function() return l10n("Force a daily quest reset check.") end,
                 width = 1.65,
                 hidden = function() return not (Questie.IsWotlk or (QuestieCompat and QuestieCompat.Is335)) end,
                 get = function(info) return QuestieOptions:GetProfileValue(info); end,
@@ -860,17 +866,19 @@ function QuestieOptions.tabs.advanced:Initialize()
             weeklyResetDay = {
                 type = "select",
                 order = 6.4,
-                values = {
-                    [1] = "Sunday",
-                    [2] = "Monday",
-                    [3] = "Tuesday",
-                    [4] = "Wednesday",
-                    [5] = "Thursday",
-                    [6] = "Friday",
-                    [7] = "Saturday",
-                },
+                values = function()
+                    return {
+                    [1] = l10n("Sunday"),
+                    [2] = l10n("Monday"),
+                    [3] = l10n("Tuesday"),
+                    [4] = l10n("Wednesday"),
+                    [5] = l10n("Thursday"),
+                    [6] = l10n("Friday"),
+                    [7] = l10n("Saturday"),
+                    }
+                end,
                 style = 'dropdown',
-                name = "Weekly Reset Day",
+                name = function() return l10n("Weekly Reset Day") end,
                 disabled = function() return not Questie.db.profile.resetDailyQuests end,
                 hidden = function() return not (Questie.IsWotlk or (QuestieCompat and QuestieCompat.Is335)) end,
                 get = function(info) return QuestieOptions:GetProfileValue(info) or 3; end,

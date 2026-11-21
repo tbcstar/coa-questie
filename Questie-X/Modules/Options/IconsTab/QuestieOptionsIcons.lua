@@ -318,7 +318,7 @@ function QuestieOptions.tabs.icons:Initialize()
                         args = {
                             phase1 = {
                                 type = "toggle",
-                                name = l10n("Phase 1"),
+                                name = function() return l10n("Phase 1") end,
                                 get = function() return Questie.db.profile.showRunesOfPhase.phase1; end,
                                 set = function(info, value)
                                     Questie.db.profile.showRunesOfPhase.phase1 = value
@@ -327,7 +327,7 @@ function QuestieOptions.tabs.icons:Initialize()
                             },
                             phase2 = {
                                 type = "toggle",
-                                name = l10n("Phase 2"),
+                                name = function() return l10n("Phase 2") end,
                                 get = function() return Questie.db.profile.showRunesOfPhase.phase2; end,
                                 set = function(info, value)
                                     Questie.db.profile.showRunesOfPhase.phase2 = value

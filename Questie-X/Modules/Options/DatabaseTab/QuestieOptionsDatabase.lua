@@ -276,12 +276,14 @@ function QuestieOptions.tabs.database:Initialize()
                     end
                     return l10n("Choose whether Questie should display learner data, static database data, both, or neither. Learner recording can stay enabled independently.")
                 end,
-                values = {
+                values = function()
+                    return {
                     auto    = l10n("Auto (current behavior)"),
                     learner = l10n("Learner Only"),
                     static  = l10n("Static Only"),
                     none    = l10n("Neither (base DB only)"),
-                },
+                    }
+                end,
                 get   = function() return GetLearnerSelectedMode() end,
                 set   = function(_, v)
                     if Questie.dbLearner.global and Questie.dbLearner.global.settings then

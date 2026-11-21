@@ -50,4 +50,8 @@
     <Script file="TrackerUI.lua"/>
     <Script file="Tutorial.lua"/>
     <Script file="WeaponSkills.lua"/>
+
+    <!-- CoA fork: loaded last, so their zhCN wins over every ["zhCN"] = false above. -->
+    <Script file="ModuleExtras.lua"/>
+    <Script file="Options\Extras.lua"/>
 </Ui>
