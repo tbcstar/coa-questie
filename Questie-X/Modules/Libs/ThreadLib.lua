@@ -36,6 +36,10 @@ function ThreadLib.Thread(threadFunction, delay, errorMessage, callbackFunction)
 
   local timer
   timer = newTicker(delay or 0, function()
+      -- This client blocks an addon's coroutine resume while in combat and reports
+      -- it as ADDON_ACTION_BLOCKED "resume()" (21 Nov 2026). Skipping the beat
+      -- costs nothing: the next tick outside combat picks the thread up again.
+      if InCombatLockdown and InCombatLockdown() then return end
       if(coStatus(thread) == "suspended") then --It's faster not to lookup the value but instead have it here
         local success, ret = coResume(thread)
         -- Something in the coroutine went wrong, print the error and stop the timer

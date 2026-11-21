@@ -44,7 +44,10 @@ function _QuestieJourney.myJourney:DrawTab(container)
         local day = CALENDAR_WEEKDAY_NAMES[tonumber(date('%w', Questie.dbJourney.char.journey[i].Timestamp)) + 1];
         local month = CALENDAR_FULLDATE_MONTH_NAMES[tonumber(date('%m', Questie.dbJourney.char.journey[i].Timestamp))];
 
-        local timestamp = Questie:Colorize(date( '[ '..day ..', '.. month ..' %d @ %H:%M ]  ' , Questie.dbJourney.char.journey[i].Timestamp), 'blue');
+        -- The client refuses a long date format ("'date' format too long"), and the
+        -- localized day and month names are part of it, so only the numbers are
+        -- formatted. 21 Nov 2026: the Chinese names made this line throw.
+        local timestamp = Questie:Colorize('[ '..day ..', '.. month ..' '.. date('%d @ %H:%M', Questie.dbJourney.char.journey[i].Timestamp) ..' ]  ', 'blue');
 
         -- if it's a quest event
         if Questie.dbJourney.char.journey[i].Event == "Quest" then

@@ -267,6 +267,8 @@ function QuestieMap:InitializeQueue()
         if not drawTimer then
             drawTimer = C_Timer.NewTicker(0.2, QuestieMap.ProcessQueue)
             fadeLogicTimerShown = C_Timer.NewTicker(0.1, function()
+                -- the client refuses a resume in combat (see ThreadLib)
+                if InCombatLockdown and InCombatLockdown() then return end
                 if fadeLogicCoroutine and coroutine.status(fadeLogicCoroutine) == "suspended" then
                     local success, errorMsg = coroutine.resume(fadeLogicCoroutine)
                     if (not success) then
