@@ -84,6 +84,7 @@ Localization\l10n.lua
 Localization\Translations\Translations.xml
 Localization\lookups\lookupQuestCategories.lua
 Localization\lookups\lookupZones.lua
+Localization\QuestNames.lua
 # Libs
 Modules\Libs\QuestieLib.lua
 Modules\Libs\QuestieSerializer.lua

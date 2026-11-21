@@ -176,7 +176,8 @@ end
 -- name, in the language the game speaks, and QuestieQuest stores it on the
 -- quest as LocalizedName. A CoA client reports enUS while its quest log is
 -- Chinese, so every quest in the tracker was listed in English (21 Nov
--- 2026). Prefer the client's name; fall back to the database.
+-- 2026). Prefer the client's name; then the server's own title table, which
+-- covers the quests the log has never carried; then the database.
 ---@param questId number
 ---@return string|nil
 function QuestieLib:GetQuestName(questId)
@@ -184,6 +185,9 @@ function QuestieLib:GetQuestName(questId)
     local name = quest and quest.LocalizedName
     if type(name) == "string" and name ~= "" then
         return name
+    end
+    if QuestieQuestNames and QuestieQuestNames[questId] then
+        return QuestieQuestNames[questId]
     end
     return QuestieDB.QueryQuestSingle(questId, "name")
 end
