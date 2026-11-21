@@ -18,6 +18,11 @@ Contents
                creature/gameobject/item loot templates (reference loot resolved one level); npc_vendor rows
   meta         core commit (if --core-dir is given), export time, row counts, stock vs custom quest id counts
 
+Names and texts come from the base tables and are then overwritten by the server's own translation tables
+(quest_template_locale, creature_template_locale, gameobject_template_locale, item_template_locale) for the
+language given by --locale (default zhCN: a Conquest of Azeroth server keeps its Chinese there). Pass
+--locale '' to export the base columns untouched.
+
 Connecting (pick one):
   local/remote MySQL   --host 127.0.0.1 --port 3306 --user acore
                        password: set MYSQL_PWD in the environment, or use --defaults-file with a [client] section
@@ -130,6 +135,36 @@ def text_fields(rows, names):
     return rows
 
 
+QUEST_LOCALE_COLUMNS = {'LogTitle': 'Title', 'QuestDescription': 'Details', 'LogDescription': 'Objectives',
+                        'ObjectiveText1': 'ObjectiveText1', 'ObjectiveText2': 'ObjectiveText2',
+                        'ObjectiveText3': 'ObjectiveText3', 'ObjectiveText4': 'ObjectiveText4'}
+CREATURE_LOCALE_COLUMNS = {'name': 'Name', 'subname': 'Title'}
+GAMEOBJECT_LOCALE_COLUMNS = {'name': 'name'}
+ITEM_LOCALE_COLUMNS = {'name': 'Name'}
+
+
+def localize(records, rows, columns, id_key):
+    """Overwrite the base-table text with the server's translation of it.
+
+    rows come from a *_locale table (already filtered to one language); a NULL cell means that row has no
+    translation for it, so the English base value stays.
+    """
+    by_id = {}
+    for row in rows:
+        by_id.setdefault(row.get(id_key), {}).update(row)
+    changed = 0
+    for rec in records:
+        row = by_id.get(rec.get(id_key))
+        if not row:
+            continue
+        for column, source in columns.items():
+            value = row.get(source)
+            if value:
+                rec[column] = str(value)
+                changed += 1
+    return changed
+
+
 def parse_args():
     p = argparse.ArgumentParser(description='Read-only quest data export for a Questie-X database plugin.')
     p.add_argument('--out', required=True, help='output file (.json.gz)')
@@ -143,6 +178,8 @@ def parse_args():
     p.add_argument('--docker-password-env', default='MYSQL_ROOT_PASSWORD',
                    help='password variable inside the container (default MYSQL_ROOT_PASSWORD)')
     p.add_argument('--core-dir', default=None, help='AzerothCore source checkout, to record its git commit')
+    p.add_argument('--locale', default='zhCN',
+                   help="language to read the server's *_locale tables in (default zhCN; '' keeps the base columns)")
     a = p.parse_args()
     if not a.docker_container and a.user is None and not a.defaults_file:
         a.user = 'acore'
@@ -287,6 +324,24 @@ def main():
     for r in gos:
         r['spawns'] = gs.get(r['entry'], [])
 
+    localized = {}
+    if ARGS.locale:
+        lang = ARGS.locale.replace("'", '')   # it goes into a quoted SQL literal
+        print(f'reading the {lang} text out of the *_locale tables ...')
+        localized['quests'] = localize(quests, q_in(
+            "SELECT ID, Title, Details, Objectives, ObjectiveText1, ObjectiveText2, ObjectiveText3, "
+            "ObjectiveText4 FROM quest_template_locale WHERE locale = '" + lang + "' AND ID IN ({ids})", quest_ids),
+            QUEST_LOCALE_COLUMNS, 'ID')
+        localized['creatures'] = localize(creatures, q_in(
+            "SELECT entry, Name, Title FROM creature_template_locale WHERE locale = '" + lang + "' AND entry IN ({ids})",
+            creature_ids), CREATURE_LOCALE_COLUMNS, 'entry')
+        localized['gameobjects'] = localize(gos, q_in(
+            "SELECT entry, name FROM gameobject_template_locale WHERE locale = '" + lang + "' AND entry IN ({ids})",
+            go_ids), GAMEOBJECT_LOCALE_COLUMNS, 'entry')
+        localized['items'] = localize(items, q_in(
+            "SELECT ID AS entry, Name FROM item_template_locale WHERE locale = '" + lang + "' AND ID IN ({ids})",
+            item_ids), ITEM_LOCALE_COLUMNS, 'entry')
+
     stock = sum(1 for i in quest_ids if i <= STOCK_MAX_QUEST_ID)
     sha = None
     if ARGS.core_dir:
@@ -297,6 +352,8 @@ def main():
             'core_commit': sha, 'database': ARGS.world_db,
             'exported_at': started.isoformat(timespec='seconds'),
             'coordinates': 'raw map/x/y/z (world units)',
+            'locale': ARGS.locale or None,
+            'localized_cells': localized,
             'quests_stock_le_%d' % STOCK_MAX_QUEST_ID: stock, 'quests_custom_gt_%d' % STOCK_MAX_QUEST_ID: len(quest_ids) - stock,
             'counts': {'quests': len(quests), 'creatures': len(creatures), 'creature_spawns': len(c_spawns),
                        'gameobjects': len(gos), 'gameobject_spawns': len(g_spawns), 'items': len(items),
