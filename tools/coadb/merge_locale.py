@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Fold the server's own translations into an already-built Questie-X-CoADB, offline.
 
+The same four exports also work for the *base* tables (quest_template, creature_template,
+gameobject_template, item_template), which is where the Chinese of custom content lives: the
+*_locale tables only carry ids up to 26034 on this server. Point --quests etc. at either export;
+columns are matched by name, so Title/Objectives, name/subname and entry/id all fit.
+
 The CoA world DB keeps its Chinese in the four *_locale tables, so the player-facing text of a
 custom quest, NPC, object or item can be replaced without touching anything else in the record:
 
@@ -19,7 +24,9 @@ Usage (paths are whatever Navicat wrote; any of the four may be omitted)
 
 CSV: first row is the column names, UTF-8, comma separated, quoted where the value needs it (the
 Navicat defaults). Rows of other locales are ignored (--locale, default zhCN), and columns are
-matched by name, case-insensitively: ID/entry, Name/name, Title, Objectives.
+matched by name, case-insensitively: ID/entry, Name/name, Title, Objectives. An export may also be
+the Navicat .sql dump of the same table: its columns are read from CREATE TABLE and every locale
+but --locale is skipped while parsing.
 """
 import argparse
 import csv
@@ -64,6 +71,82 @@ def read_table(path, locale, id_names, wanted):
             rows[int(key)] = {k: (row.get(c) or "") for k, c in cols.items()}
     return rows
 
+
+def parse_tuple(text, i):
+    """Values of the (...) at text[i], as Navicat's mysqldump writes them."""
+    values, i = [], i + 1
+    while True:
+        while text[i] in " \t\r\n":
+            i += 1
+        if text[i] == "'":
+            i += 1
+            buf = []
+            while True:
+                ch = text[i]
+                if ch == "\\":
+                    nxt = text[i + 1]
+                    buf.append({"0": "\0", "b": "\b", "n": "\n", "r": "\r", "t": "\t", "Z": "\x1a"}.get(nxt, nxt))
+                    i += 2
+                elif ch == "'":
+                    if text[i + 1:i + 2] == "'":
+                        buf.append("'")
+                        i += 2
+                    else:
+                        i += 1
+                        break
+                else:
+                    buf.append(ch)
+                    i += 1
+            values.append("".join(buf))
+        else:
+            j = i
+            while text[j] not in ",)":
+                j += 1
+            raw = text[i:j].strip()
+            values.append(None if raw.upper() == "NULL" else raw)
+            i = j
+        while text[i] in " \t\r\n":
+            i += 1
+        if text[i] == ",":
+            i += 1
+            continue
+        return values, i + 1
+
+
+def read_dump(path, locale, id_names, wanted):
+    """{id: {column: value}} for one locale table, straight from a Navicat SQL dump."""
+    with open(path, encoding="utf-8", errors="replace") as f:
+        text = f.read()
+    head = re.search(r"CREATE TABLE[^(]*\((.*?)\n\)", text, re.S)
+    columns = re.findall(r"^\s*`([^`]+)`", head.group(1), re.M) if head else []
+    if not columns:
+        raise SystemExit("%s: no CREATE TABLE, so the columns cannot be named" % path)
+    lower = [c.strip().lower() for c in columns]
+    id_at = next((lower.index(n) for n in id_names if n in lower), None)
+    if id_at is None:
+        raise SystemExit("%s: no %s column (found: %s)" % (path, "/".join(id_names), ", ".join(columns)))
+    locale_at = lower.index("locale") if "locale" in lower else None
+    rows, pos = {}, 0
+    while True:
+        i = text.find("VALUES (", pos)
+        if i < 0:
+            return rows
+        values, pos = parse_tuple(text, i + len("VALUES "))
+        if len(values) != len(columns):
+            raise SystemExit("%s: a row has %d values for %d columns" % (path, len(values), len(columns)))
+        if locale_at is not None and values[locale_at] != locale:
+            continue
+        key = values[id_at]
+        if not (key or "").strip().isdigit():
+            continue
+        rows[int(key.strip())] = {k: (values[lower.index(k)] or "") for k in wanted if k in lower}
+
+
+def read_rows(path, locale, id_names, wanted):
+    """An export is either the CSV the docs describe or a plain SQL dump."""
+    if path.lower().endswith(".sql"):
+        return read_dump(path, locale, id_names, wanted)
+    return read_table(path, locale, id_names, wanted)
 
 FIRST_STRING = r'\[1\]="(?:\\.|[^"\\])*"'
 SUBNAME = r'\[14\]="(?:\\.|[^"\\])*"'
@@ -119,7 +202,7 @@ def merge(data_dir, stem, rows, kind, dry_run):
                 body, n = replace_name(body, text)
                 fields += n
             if kind == "npc":
-                sub = clean(row.get("title") or "")
+                sub = clean(row.get("title") or "") or clean(row.get("subname") or "")
                 if sub:
                     body, n = replace_subname(body, sub)
                     fields += n
@@ -157,10 +240,10 @@ def main():
     if not any((args.quests, args.creatures, args.objects, args.items)):
         raise SystemExit("nothing to merge: pass at least one --quests/--creatures/--objects/--items")
     total = 0
-    total += merge(args.data_dir, "CoAQuestDB", read_table(args.quests, args.locale, ("id",), ("title", "objectives")) if args.quests else {}, "quest", args.dry_run)
-    total += merge(args.data_dir, "CoANpcDB", read_table(args.creatures, args.locale, ("entry", "id"), ("name", "title")) if args.creatures else {}, "npc", args.dry_run)
-    total += merge(args.data_dir, "CoAObjectDB", read_table(args.objects, args.locale, ("entry", "id"), ("name",)) if args.objects else {}, "object", args.dry_run)
-    total += merge(args.data_dir, "CoAItemDB", read_table(args.items, args.locale, ("id", "entry"), ("name",)) if args.items else {}, "item", args.dry_run)
+    total += merge(args.data_dir, "CoAQuestDB", read_rows(args.quests, args.locale, ("id",), ("title", "objectives")) if args.quests else {}, "quest", args.dry_run)
+    total += merge(args.data_dir, "CoANpcDB", read_rows(args.creatures, args.locale, ("entry", "id"), ("name", "title", "subname")) if args.creatures else {}, "npc", args.dry_run)
+    total += merge(args.data_dir, "CoAObjectDB", read_rows(args.objects, args.locale, ("entry", "id"), ("name",)) if args.objects else {}, "object", args.dry_run)
+    total += merge(args.data_dir, "CoAItemDB", read_rows(args.items, args.locale, ("id", "entry"), ("name",)) if args.items else {}, "item", args.dry_run)
     print("total: %d records %s" % (total, "would be rewritten" if args.dry_run else "rewritten"))
     return 0
 
