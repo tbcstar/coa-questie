@@ -239,9 +239,10 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
         if QUESTIE_LOCALES_OVERRIDE ~= nil then
             l10n:SetUILocale(QUESTIE_LOCALES_OVERRIDE.locale);
         else
-            -- Not GetLocale() alone: a CoA client reports enUS while its own
-            -- labels are Chinese (l10n:GetClientLocale, 21 Nov 2026).
-            l10n:SetUILocale(l10n:GetClientLocale());
+            -- This fork serves a Chinese server, so Chinese is the default on
+            -- every client whatever GetLocale() reports (21 Nov 2026). The
+            -- advanced option above still picks another language.
+            l10n:SetUILocale(l10n:GetDefaultLocale());
         end
     end
 

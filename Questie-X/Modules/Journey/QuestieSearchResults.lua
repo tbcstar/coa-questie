@@ -657,7 +657,7 @@ _HandleOnGroupSelected = function (resultType)
     -- This is either the questId, npcId, objectId or itemId
     local selectedId = tonumber(resultType.localstatus.selected)
     if IsShiftKeyDown() and lastOpenSearch == "quest" then
-        local questName = QuestieDB.QueryQuestSingle(selectedId, "name")
+        local questName = QuestieLib:GetQuestName(selectedId)
         local questLevel, _ = QuestieLib.GetTbcLevel(selectedId);
 
         ChatEdit_InsertLink(QuestieLink:GetQuestLinkString(questLevel, questName, selectedId))

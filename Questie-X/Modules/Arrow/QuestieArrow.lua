@@ -30,6 +30,16 @@ local abs = math.abs
 local max = math.max
 local min = math.min
 
+
+-- The name to print for a quest: the client's own (the quest log's), not
+-- Questie's English database name. A CoA client reports enUS while its
+-- quest log is Chinese, so the arrow named quests in English
+-- (21 Nov 2026).
+local function QuestName(quest)
+    if quest then
+        return quest.LocalizedName or quest.name
+    end
+end
 local ARROW_SHEET_SIZE = 512
 local ARROW_CELL_W = 56
 local ARROW_CELL_H = 42
@@ -1056,7 +1066,7 @@ local function _CollectFinisherSpawns(finisher, quest)
                                                     if tInst ~= pInst then
                                                         dist = 500000 + dist * 100
                                                     end
-                                                    _AddArrowTarget(x, y, uiMapId, quest.name, quest.level, iconPath, tX, tY, tInst, dist)
+                                                    _AddArrowTarget(x, y, uiMapId, QuestName(quest), quest.level, iconPath, tX, tY, tInst, dist)
                                                 end
                                             end
                                         end
@@ -1077,7 +1087,7 @@ local function _CollectFinisherSpawns(finisher, quest)
                                             if tInst ~= pInst then
                                                 dist = 500000 + dist * 100
                                             end
-                                            _AddArrowTarget(x, y, uiMapId, quest.name, quest.level, iconPath, tX, tY, tInst, dist)
+                                            _AddArrowTarget(x, y, uiMapId, QuestName(quest), quest.level, iconPath, tX, tY, tInst, dist)
                                         end
                                     end
                                 end
@@ -1104,7 +1114,7 @@ local function _CollectFinisherSpawns(finisher, quest)
                                 if tInst ~= pInst then
                                     dist = 500000 + dist * 100
                                 end
-                                _AddArrowTarget(x, y, uiMapId, quest.name, quest.level, iconPath, tX, tY, tInst, dist)
+                                _AddArrowTarget(x, y, uiMapId, QuestName(quest), quest.level, iconPath, tX, tY, tInst, dist)
                             end
                         end
                     end
@@ -1165,7 +1175,7 @@ local function _CollectObjective(objective, quest)
                                         spawn[1],
                                         spawn[2],
                                         uiMapId,
-                                        quest.name,
+                                        QuestName(quest),
                                         quest.level,
                                         iconPath,
                                         tX,

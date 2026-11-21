@@ -559,12 +559,11 @@ function QuestieOptions.tabs.advanced:Initialize()
                 set = function(_, lang)
                     local previousLocale = Questie.db.global.questieLocale
                     if lang == 'auto' then
-                        local clientLocale = l10n:GetClientLocale()
-                        if QUESTIE_LOCALES_OVERRIDE ~= nil then
-                            clientLocale = QUESTIE_LOCALES_OVERRIDE.locale
-                        end
-                        l10n:SetUILocale(clientLocale)
-                        Questie.db.global.questieLocale = clientLocale
+                        -- "Automatic" is this fork's default, Chinese, not
+                        -- whatever GetLocale() reports (21 Nov 2026).
+                        local defaultLocale = l10n:GetDefaultLocale()
+                        l10n:SetUILocale(defaultLocale)
+                        Questie.db.global.questieLocale = defaultLocale
                         Questie.db.global.questieLocaleDiff = false
                     else
                         l10n:SetUILocale(lang);

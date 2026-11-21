@@ -6,6 +6,8 @@ local _QuestieJourney = QuestieJourney.private
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB")
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 
 --- COMPATIBILITY ---
 local CALENDAR_FULLDATE_MONTH_NAMES = QuestieCompat.CALENDAR_FULLDATE_MONTH_NAMES
@@ -108,7 +110,7 @@ function _QuestieJourney:GetEntryText(entry)
         else
             state = "ERROR!!"
         end
-        local qName = QuestieDB.QueryQuestSingle(entry.Quest, "name")
+        local qName = QuestieLib:GetQuestName(entry.Quest)
         entryText = l10n('Quest %s: %s', state or "no state", qName or "no quest name")
     end
     return entryText

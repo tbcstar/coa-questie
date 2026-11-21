@@ -171,12 +171,29 @@ function QuestieLib:GetRGBForObjective(objective)
     end
 end
 
+--- The name to print for a quest.
+-- Questie's database names are English. The client knows the quest's own
+-- name, in the language the game speaks, and QuestieQuest stores it on the
+-- quest as LocalizedName. A CoA client reports enUS while its quest log is
+-- Chinese, so every quest in the tracker was listed in English (21 Nov
+-- 2026). Prefer the client's name; fall back to the database.
+---@param questId number
+---@return string|nil
+function QuestieLib:GetQuestName(questId)
+    local quest = QuestieDB.GetQuest(questId)
+    local name = quest and quest.LocalizedName
+    if type(name) == "string" and name ~= "" then
+        return name
+    end
+    return QuestieDB.QueryQuestSingle(questId, "name")
+end
+
 ---@param questId number
 ---@param showLevel number @ Whether the quest level should be included
 ---@param showState boolean @ Whether to show (Complete/Failed)
 ---@param blizzLike boolean @True = [40+], false/nil = [40D/R]
 function QuestieLib:GetColoredQuestName(questId, showLevel, showState, blizzLike)
-    local name = QuestieDB.QueryQuestSingle(questId, "name")
+    local name = QuestieLib:GetQuestName(questId)
     local level, _ = QuestieLib.GetTbcLevel(questId);
 
     if name == nil then

@@ -54,6 +54,17 @@ end
 -- the client says enUS but its own labels are Chinese (a CoA client whose
 -- data is patched Chinese while its interface folder stays enUS).
 ---@return string
+--- The locale this fork speaks when the player has not picked one:
+-- Chinese on every client, whatever GetLocale() reports (21 Nov 2026).
+-- An external locale override still wins over the fork default.
+---@return string
+function l10n:GetDefaultLocale()
+    if QUESTIE_LOCALES_OVERRIDE ~= nil then
+        return QUESTIE_LOCALES_OVERRIDE.locale
+    end
+    return "zhCN"
+end
+
 function l10n:GetClientLocale()
     local reported = GetLocale()
     if (reported == "enUS" or reported == "enGB") and ClientTextIsChinese() then

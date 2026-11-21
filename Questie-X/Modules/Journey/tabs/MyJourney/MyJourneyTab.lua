@@ -10,6 +10,8 @@ local QuestieJourneyUtils = QuestieLoader:ImportModule("QuestieJourneyUtils");
 local QuestieDB = QuestieLoader:ImportModule("QuestieDB");
 ---@type l10n
 local l10n = QuestieLoader:ImportModule("l10n")
+---@type QuestieLib
+local QuestieLib = QuestieLoader:ImportModule("QuestieLib")
 
 --- COMPATIBILITY ---
 local CALENDAR_WEEKDAY_NAMES = QuestieCompat.CALENDAR_WEEKDAY_NAMES
@@ -46,7 +48,7 @@ function _QuestieJourney.myJourney:DrawTab(container)
 
         -- if it's a quest event
         if Questie.dbJourney.char.journey[i].Event == "Quest" then
-            local qName = QuestieDB.QueryQuestSingle(Questie.dbJourney.char.journey[i].Quest, "name");
+            local qName = QuestieLib:GetQuestName(Questie.dbJourney.char.journey[i].Quest);
             if qName then
                 qName = Questie:Colorize(qName, 'gray');
 
