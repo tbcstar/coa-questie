@@ -16,6 +16,9 @@ local QuestieQuest = QuestieLoader:ImportModule("QuestieQuest")
 ---@type QuestieTracker
 local QuestieTracker = QuestieLoader:ImportModule("QuestieTracker")
 
+---@type l10n
+local l10n = QuestieLoader:ImportModule("l10n")
+
 function Tutorial.CreateAscensionScalingFrame()
     if Tutorial.ascensionScalingFrame then
         Tutorial.ascensionScalingFrame:Show()
