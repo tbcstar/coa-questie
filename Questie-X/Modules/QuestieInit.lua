@@ -169,13 +169,23 @@ function QuestieInit:OnInitialize()
         -- We drain the coroutine synchronously (resume until dead) so that
         -- QuestieDB.QuestPointers is set before OnInitialize returns.
         local co = coroutine.create(QuestieInit.Stages[1])
-        while coroutine.status(co) == "suspended" do
-            local ok, err = coroutine.resume(co)
-            if not ok then
-                print(debugstack(co))
-                break
+        local function Drain()
+            -- This client blocks an addon's coroutine resume while in combat and
+            -- reports it as ADDON_ACTION_BLOCKED "resume()" (21 Nov 2026), so a
+            -- reload in combat waits for the fight to end instead of asking.
+            if InCombatLockdown and InCombatLockdown() then
+                C_Timer.After(0.5, Drain)
+                return
+            end
+            while coroutine.status(co) == "suspended" do
+                local ok, err = coroutine.resume(co)
+                if not ok then
+                    print(debugstack(co))
+                    return
+                end
             end
         end
+        Drain()
     else
     end
 end
@@ -364,10 +374,18 @@ QuestieInit.Stages[2] = function()
         if keepWaiting then
             Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage2] Quest cache validation timed out! Some data may still be loading.")
             keepWaiting = false
-            local ok, err = coroutine.resume(QuestieInit.Thread)
-            if not ok then
-                Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage2] Resume failed (timeout): " .. tostring(err))
+            local function ResumeTimeout()
+                -- Same block as OnInitialize: ask again once combat is over.
+                if InCombatLockdown and InCombatLockdown() then
+                    C_Timer.After(0.5, ResumeTimeout)
+                    return
+                end
+                local ok, err = coroutine.resume(QuestieInit.Thread)
+                if not ok then
+                    Questie:Debug(Questie.DEBUG_INFO, "[QuestieInit:Stage2] Resume failed (timeout): " .. tostring(err))
+                end
             end
+            ResumeTimeout()
         end
     end)
 
@@ -619,6 +637,13 @@ function QuestieInit:Init()
     local function resumeInit()
         if not QuestieInit.Thread or coroutine.status(QuestieInit.Thread) == "dead" then
             return -- coroutine finished or failed
+        end
+        -- This client blocks an addon's coroutine resume while in combat and
+        -- reports it as ADDON_ACTION_BLOCKED "resume()" (21 Nov 2026): come
+        -- back once the fight is over rather than ask.
+        if InCombatLockdown and InCombatLockdown() then
+            C_Timer.After(0.2, resumeInit)
+            return
         end
         local ok, err = coroutine.resume(QuestieInit.Thread)
         if not ok then

@@ -1,5 +1,5 @@
 -- Last update: 2020/10/05 （祈福@枫聖-重新整理）
-if GetLocale() ~= "zhCN" then
+if (GAME_LOCALE or GetLocale()) ~= "zhCN" then
     return
 end
 

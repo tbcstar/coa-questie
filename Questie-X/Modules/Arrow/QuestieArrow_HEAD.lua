@@ -294,7 +294,7 @@ local pX, pY, pInst = _arrow_playerX, _arrow_playerY, _arrow_playerInstance
             if debugArrow then
                 print(string.format("QuestieArrow OnUpdate: player position nil (x=%s y=%s inst=%s)", tostring(pX), tostring(pY), tostring(pInst)))
             end
-            self.distance:SetText("Distance: --")
+            self.distance:SetText("距离：--")
             self:Hide()
             return
         end
@@ -323,7 +323,7 @@ local pX, pY, pInst = _arrow_playerX, _arrow_playerY, _arrow_playerInstance
             -- Same uiMapId: compute target world coords using HBD
             targetX, targetY, targetInstance = HBD:GetWorldCoordinatesFromZone(target.x / 100.0, target.y / 100.0, targetUiMapId)
             if not targetX or not targetY or not targetInstance then
-                self.distance:SetText("Distance: --")
+                self.distance:SetText("距离：--")
                 return
             end
         else
@@ -341,7 +341,7 @@ local pX, pY, pInst = _arrow_playerX, _arrow_playerY, _arrow_playerInstance
 
         -- If targetX is still nil at this point, bail out
         if not targetX or not targetY then
-            self.distance:SetText("Distance: --")
+            self.distance:SetText("距离：--")
             return
         end
 
@@ -357,7 +357,7 @@ local pX, pY, pInst = _arrow_playerX, _arrow_playerY, _arrow_playerInstance
 
 -- targetX/Y are already world coords from the same-map or cross-map branch above
         if not targetX or not targetY then
-            self.distance:SetText("Distance: --")
+            self.distance:SetText("距离：--")
             return
         end
 
@@ -415,7 +415,7 @@ local pX, pY, pInst = _arrow_playerX, _arrow_playerY, _arrow_playerInstance
             self.arrow:SetAlpha(alpha)
 
             local distText = string.format("%.1f", dist)
-            self.distance:SetText("Distance: " .. distText)
+            self.distance:SetText("距离：" .. distText)
         end
 
         -- Update title and icon when target changes
