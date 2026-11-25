@@ -34,6 +34,8 @@
     <Script file="Zones\Northrend.lua"/>
     <Script file="Zones\Raids.lua"/>
     <Script file="Zones\ZoneSections.lua"/>
+    <!-- CoA fork: the sub-area names the tracker header shows (zone names the files above do not list). -->
+    <Script file="Zones\CoAZoneNames.lua"/>
 
     <Script file="Classes.lua"/>
     <Script file="Comms.lua"/>

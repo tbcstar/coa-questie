@@ -2199,6 +2199,16 @@ function QuestieDB.GetQuest(questId, ...) -- /dump QuestieDB.GetQuest(867)
         end
     end
 
+    -- CoA fix: the title the server itself gives the quest. Questie's own DB
+    -- names are English ("Scavenging Deathknell"); a CoA client reads Chinese
+    -- everywhere, and every display path - arrow, tracker, journey, chat links,
+    -- map tooltips - copies quest.name from this object. Localising it here
+    -- fixes all of them at once. QuestieQuestNames is the table
+    -- Localization\QuestNames.lua builds from the server's quest titles.
+    if QuestieQuestNames and QuestieQuestNames[questId] then
+        QO.name = QuestieQuestNames[questId]
+    end
+
     _QuestieDB.questCache[questId] = QO
     return QO
 end
@@ -2648,10 +2658,23 @@ end
 -- obtainable until entering the specific quest dialog.
 -- This is a bruteforce method for obtaining a QuestID with no input other than a quest name, and the ID of the questgiver.
 -- It compares the name of the quest entry with the names of every quest that questgiver can either start or end.
+--- CoA fix: the client hands us the quest's *localized* title (a CoA client shows
+--- Chinese) while the DB, and so QueryQuestSingle, is English. Accept either name so
+--- the quest giver frame still links the quest the player is looking at.
+--- @param questId QuestId
+--- @param name string?
+--- @return boolean
+local function QuestNameMatches(questId, name)
+    if not name then return false end
+    if name == QuestieDB.QueryQuestSingle(questId, "name") then return true end
+    return QuestieQuestNames ~= nil and QuestieQuestNames[questId] == name
+end
+
 ---@param name string? @The name of the quest entry
 ---@param questgiverGUID string? @Should be UnitGUID("questnpc")
 ---@param questStarter boolean @Should be True if this is an available quest, False if this is an "active" quest (quest ender)
 ---@return number
+
 function QuestieDB.GetQuestIDFromName(name, questgiverGUID, questStarter)
     local questID = 0 -- worst case, we end up returning an ID of 0 if we can't find a match; any function relying on this one should handle 0 cleanly
     if questgiverGUID then
@@ -2673,7 +2696,7 @@ function QuestieDB.GetQuestIDFromName(name, questgiverGUID, questStarter)
             if questsStarted then
                 local _id, id = next(questsStarted)
                 while _id do
-                    if (name == QuestieDB.QueryQuestSingle(id, "name")) and (QuestieDB.IsDoable(id)) then
+                    if QuestNameMatches(id, name) and QuestieDB.IsDoable(id) then
                         -- the QuestieDB.IsDoable check is important to filter out identically named quests
                         questID = id
                     end
@@ -2689,7 +2712,7 @@ function QuestieDB.GetQuestIDFromName(name, questgiverGUID, questStarter)
             if questsEnded then
                 local _id, id = next(questsEnded)
                 while _id do
-                    if (name == QuestieDB.QueryQuestSingle(id, "name")) and (QuestieDB.IsDoable(id)) and QuestiePlayer.currentQuestlog[id] then
+                    if QuestNameMatches(id, name) and QuestieDB.IsDoable(id) and QuestiePlayer.currentQuestlog[id] then
                         questID = id
                     end
                     _id, id = next(questsEnded, _id)

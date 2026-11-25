@@ -53,6 +53,7 @@ If you also use Zygor or TomTom, turn off one of the quest arrows so they don't 
   Quests the server marks "any race" but which only Alliance-friendly (or only Horde-friendly) NPCs give are marked for that faction, so the other faction doesn't see their markers.
 
   Where two zone maps overlap at a border, an NPC or object goes on the map of its own quests' zone. For example, the Rebel Camp is on the Stranglethorn map, not Duskwood's. Capital cities keep their own. CoA's own new zones (Pale Reach, Druk'Thar) use their own world maps, so Pale Reach's quest givers and objectives show on the Pale Reach map. Thanks to Kalistez for the Lootbot report.
+- **Chinese quest and sub-zone names (Chinese clients).** Questie's own database is English, so the quest arrow's title and the tracker's zone heading stayed English while the rest of the client was Chinese. A quest now takes its title from the server's own table (`Questie-X\Localization\QuestNames.lua`, built from `quest_template`), and the sub-areas the tracker header shows - "Deathknell", "Brill", "The Bulwark" - come from the client's `AreaTable.dbc` in the new `Questie-X\Localization\Translations\Zones\CoAZoneNames.lua` (2,105 names, big zones in the existing translation files are left alone). Quest givers also accept a quest's Chinese title when matching it to the quest log, which is what the client hands Questie on these servers (`Questie-X\Database\QuestieDB.lua`).
 
 ## If your server is different
 
@@ -65,6 +66,7 @@ Requirements: Python 3 (standard library only), and Lua 5.1 for the stock-index 
 | Script | Does |
 |---|---|
 | `tools/gen_coa_maps.py` | Regenerates `CoAExtraZones.lua` from your client's `WorldMapArea.dbc` |
+| `tools/gen_area_names.py` | Regenerates `Questie-X\Localization\Translations\Zones\CoAZoneNames.lua` from a Chinese client's area names |
 | `tools/mpq.py` | Minimal read-only MPQ reader used by the generators |
 | `tools/coadb/questie-export.py` | **Runs on the server.** Read-only (`SELECT` only) export of the quests, NPCs, objects, items, spawns and drop sources Questie needs, as one `.json.gz` |
 | `tools/coadb/dump_stock.lua` | Indexes Questie's stock WotLK/Ascension data for the comparison: `lua5.1 dump_stock.lua <AddOns>\Questie-X-WotLKDB <AddOns>\Questie-X-AscensionDB > stock_index.tsv` |
