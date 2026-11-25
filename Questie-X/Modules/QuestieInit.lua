@@ -652,7 +652,11 @@ function QuestieInit:Init()
             Questie:Error(msg)
             print("|cFFFF0000" .. msg .. "|r")
         elseif coroutine.status(QuestieInit.Thread) ~= "dead" then
-            C_Timer.After(0.02, resumeInit) -- continue yielding using the timer shim
+            -- Resume on the next frame: the shim only fires from OnUpdate, so a
+            -- 0.02 s delay cost a frame plus the wait, and the DB compile alone
+            -- measured 5.5 s of wall time for ~260 yields. The compile slices its
+            -- own work (compiler.lua SLICE_MS), so one slice per frame is enough.
+            C_Timer.After(0, resumeInit) -- continue yielding using the timer shim
         end
     end
 

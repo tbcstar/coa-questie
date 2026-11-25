@@ -18,9 +18,16 @@ local abs, min, floor = math.abs, math.min, math.floor
 local lshift = bit.lshift
 
 
--- how fast to run operations (lower = slower but less lag)
+-- How much work one uninterrupted slice may do. This used to be a fixed number
+-- of entries per yield, and on the 3.3.5 client every yield costs a whole frame
+-- (C_Timer is a frame-driven shim here), so a compile that measured 7.2 s of wall
+-- time was mostly waiting, not working. Slice by wall clock wherever the client
+-- can measure it (debugprofilestop is accurate on this client) and keep the entry
+-- count as the fallback for clients that cannot.
+local SLICE_MS = 8
 local TICKS_PER_YIELD = 48
 local TICKS_PER_YIELD_DEBUG = TICKS_PER_YIELD * 3
+local MAX_TICKS_PER_YIELD = 4000
 
 local function safeYield()
     if coroutine.running() then
@@ -985,9 +992,15 @@ function QuestieDBCompiler:CompileTableCoroutine(tbl, types, order, lookup, data
     local writers = QuestieDBCompiler.writers
     local supportedTypes = QuestieDBCompiler.supportedTypes
 
+    local clock = (type(debugprofilestop) == "function") and debugprofilestop or nil
+    local maxTicks = Questie.db.profile.debugEnabled and TICKS_PER_YIELD_DEBUG
+        or (entriesPerTick or (clock and MAX_TICKS_PER_YIELD or TICKS_PER_YIELD))
+
     while true do
         safeYield()
-        for _=0,Questie.db.profile.debugEnabled and TICKS_PER_YIELD_DEBUG or (entriesPerTick or TICKS_PER_YIELD) do
+        local sliceEnd = clock and (clock() + SLICE_MS) or nil
+        for _=0,maxTicks do
+            if sliceEnd and clock() >= sliceEnd then break end
             index = index + 1
             if index == count then
                 local binaryBucket = Questie.dbCache and Questie.dbCache.global or Questie.db.global
